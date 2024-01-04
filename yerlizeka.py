@@ -380,9 +380,3 @@ class Solve8():
         def __lt__(self, other):
             return self.f < other.f
 
-            
-board = EightTile()
-board.shuffle(10)
-print(board)
-solver = Solve8()
-print(solver.Solver(board))
