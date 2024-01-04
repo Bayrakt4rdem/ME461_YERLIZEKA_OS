@@ -223,7 +223,7 @@ class Solve8():
         return "YERLI ZEKA"
         
         
-    def Solver(self, boardobj):
+    def Solve(self, boardobj):
         '''
         Solves the 8-puzzle using the A* algorithm.
         '''
