@@ -223,7 +223,7 @@ class Solve8():
         return "YERLI ZEKA"
         
         
-    def Solve(self, boardobj):
+    def Solver2(self, boardobj):
         '''
         Solves the 8-puzzle using the A* algorithm.
         '''
@@ -251,17 +251,18 @@ class Solve8():
                 else:
                     self.openlist.append(successor) #if the successor node is not in the openlist, add it to the openlist
 
-    def Fastest(self): 
+    def Solver(self, boardobj): 
         '''
         Solves the 8-puzzle using the bidirectional A* algorithm.
         '''
-
+        self.initboard = boardobj.Board
+        self.goalboard = np.array([[1,2,3],[4,5,6],[7,8,0]])
         self.openlist_start = [] 
         self.closedlist_start = [] 
         self.openlist_end = []
         self.closedlist_end = []
-        self.openlist_start.append(Node(self.initboard, goalboard = self.goalboard)) 
-        self.openlist_end.append(Node(self.goalboard, goalboard = self.initboard))
+        self.openlist_start.append(self.Node(self.initboard, goalboard = self.goalboard)) 
+        self.openlist_end.append(self.Node(self.goalboard, goalboard = self.initboard))
         
         #Basically the same as the A* algorithm, but with paths from both the start and end nodes
         while self.openlist_start or self.openlist_end: 
@@ -279,8 +280,8 @@ class Solve8():
                 return self.closedlist_start[self.closedlist_start.index(current_end)].moves + [[array[0]*-1, array[1]*-1] for array in current_end.moves[::-1]]
             moves_start = current_start.PossibleMoves()
             moves_end = current_end.PossibleMoves()
-            successor_nodes_start = [Node(current_start, move) for move in moves_start]
-            successor_nodes_end = [Node(current_end, move) for move in moves_end]
+            successor_nodes_start = [self.Node(current_start, move) for move in moves_start]
+            successor_nodes_end = [self.Node(current_end, move) for move in moves_end]
             for successor in successor_nodes_start:
                 if successor in self.closedlist_start:
                     continue
@@ -379,4 +380,9 @@ class Solve8():
         def __lt__(self, other):
             return self.f < other.f
 
-        
+            
+board = EightTile()
+board.shuffle(10)
+print(board)
+solver = Solve8()
+print(solver.Solver(board))
