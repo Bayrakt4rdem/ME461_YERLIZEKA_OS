@@ -8,7 +8,7 @@ from PIL import Image, ImageDraw, ImageFont
 from PIL import Image # if needed more can be importaed
 import imageio
 import time
-import heapq
+
 
 class EightTile():
     '''
@@ -223,19 +223,16 @@ class Solve8():
         return "YERLI ZEKA"
         
         
-    def Solver2(self, boardobj):
-        '''
-        Solves the 8-puzzle using the A* algorithm.
-        '''
+    def Solve(self, boardobj):
+        import heapq
         self.initboard = boardobj.Board
         self.goalboard = np.array([[1,2,3],[4,5,6],[7,8,0]])
         self.openlist = [] #list of nodes to be evaluated
-        self.closedlist = [] #list of nodes already evaluated
-        self.openlist.append(self.Node(self.initboard, goalboard = self.goalboard)) #add the root node to the openlist
+        self.closedlist = set() #list of nodes already evaluated
+        heapq.heappush(self.openlist, (0, self.Node(self.initboard, goalboard = self.goalboard))) #add the root node to the openlist
         while self.openlist: #while the openlist is not empty
-            self.openlist.sort(key = lambda x: x.f) #sort the openlist by f value (lowest first)
-            current = self.openlist.pop(0) #pop the node with the lowest f value
-            self.closedlist.append(current) #add the node to the closedlist
+            _, current = heapq.heappop(self.openlist) #pop the node with the lowest f value
+            self.closedlist.add(current) #add the node to the closedlist
             moves = current.PossibleMoves() #find the possible moves from the current node
             successor_nodes = [self.Node(current, move) for move in moves] #create a list of successor nodes
             for successor in successor_nodes: 
@@ -243,15 +240,15 @@ class Solve8():
                     return successor.moves
                 if successor in self.closedlist: #if the successor node is already in the closedlist, pass over it
                     continue
-                elif successor in self.openlist: #if the successor node is already in the openlist, check if it has a lower g value
-                    open_node = self.openlist[self.openlist.index(successor)]
+                elif any(successor == node for _, node in self.openlist): #if the successor node is already in the openlist, check if it has a lower g value
+                    open_node = next(node for _, node in self.openlist if node == successor)
                     if successor.g < open_node.g: #if it does, update the g value and moves
                         open_node.g = successor.g
                         open_node.moves = successor.moves
                 else:
-                    self.openlist.append(successor) #if the successor node is not in the openlist, add it to the openlist
+                    heapq.heappush(self.openlist, (successor.f, successor)) #if the successor node is not in the openlist, add it to the openlist
 
-    def Solver(self, boardobj): 
+    def Solver2(self, boardobj): 
         '''
         Solves the 8-puzzle using the bidirectional A* algorithm.
         '''
@@ -320,7 +317,7 @@ class Solve8():
                 self.moves = parent.moves + [move]
                 self.g = parent.g + 1
                 self.h = self.calc_hn
-                self.f = self.g + self.h
+                self.f = self.g + 1.3* self.h
 
         def ApplyMove(self, move):
             '''
@@ -379,4 +376,14 @@ class Solve8():
         #Function to allow comparison of nodes
         def __lt__(self, other):
             return self.f < other.f
-
+        
+# board = EightTile()
+# board.shuffle(50)
+# print(board)
+# solver = Solve8()
+# import time
+# start = time.time()
+# moves = solver.Solve(board)
+# end = time.time()
+# print(end-start)
+# print('Solved in {} moves'.format(len(moves)))
